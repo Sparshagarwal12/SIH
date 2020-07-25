@@ -26,16 +26,16 @@ async def root(image: Image):
     os.system("wget -O image.jpg " + image.imageurl)
     imgpath = 'image.jpg'
     image = cv2.imread(imgpath)
-    y, x, s = image.shape
+    # y, x, s = image.shape
     # print(image.shape)
-    cx = x//2
-    cy = y//2
+    # cx = x//2
+    # cy = y//2
     # print(cx,cy)
-    image_cropped = image[cy-150:cy+150, cx-150:cx+150]
+    # image_cropped = image[cy-150:cy+150, cx-150:cx+150]
     orig = image.copy()
     (h, w) = image.shape[:2]
 
-    img = cv2.cvtColor(image_cropped, cv2.COLOR_BGR2RGB)
+    img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     img = cv2.resize(img, (150, 150))
     img = img_to_array(img)
     img = preprocess_input(img)
