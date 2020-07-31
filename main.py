@@ -6,10 +6,31 @@ import numpy as np
 import cv2
 import os
 from pydantic import BaseModel
+import zenith as sunFun
+import datetime as dt
+try:
+    from importlib import reload
+except ImportError:
+    try:
+        from imp import reload
+    except ImportError:
+        pass
+
+import pandas as pd
+import warnings
+
+from pvlib import atmosphere
+from pvlib.tools import datetime_to_djd, djd_to_datetime
 
 
 class Image(BaseModel):
     imageurl: str
+
+
+class SunClass(BaseModel):
+    latitude: float
+    longitude: float
+    timezone: float
 
 
 # Create an instance of FastAPI class
@@ -19,7 +40,7 @@ app = FastAPI()
 model = load_model('model.h5')
 
 
-@app.get("/")
+@app.post("/")
 async def root(image: Image):
     if(not image.imageurl):
         return {"message": "No Image url passed"}
@@ -55,3 +76,11 @@ async def root(image: Image):
     # include the probability in the label
     label = "{}: {:.2f}%".format(label, max(h, l, m) * 100)
     return {"turbidity": label}
+
+
+@app.post("/sun")
+async def sun(sunclass: SunClass):
+    res = sunFun.get_solarposition(
+        sunclass.timezone, sunclass.latitude, sunclass.longitude)
+    l = res.values.tolist()[0]
+    return {"apparent_zenith": l[0], "zenith": l[1], "apparent_elevation": l[2], "elevation": l[3], "azimuth": l[4], "equation_of_time": l[5]}
